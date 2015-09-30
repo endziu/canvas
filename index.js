@@ -32,7 +32,6 @@ window.requestAnimFrame = (function(){
   Game.prototype = {
     update: function() {
       var bodies = this.bodies;
-
       var notCollidingAtAll = function(b1){
         return bodies.filter(function(b2) {
           return colliding(b1,b2);
@@ -144,7 +143,8 @@ window.requestAnimFrame = (function(){
   var makeEnemies = function(game,gameSize,num) {
     var enemies = [];
     for(i=0; i < num; i++) {
-      enemies.push(new Enemy(game,{x: Math.random() * gameSize.x, y: Math.random() * gameSize.y * .5 - gameSize.y * .5}))
+      enemies.push(new Enemy(game,{x: Math.random() * gameSize.x,
+                                   y: Math.random() * gameSize.y * .5 - gameSize.y * .25}))
     }
     return enemies;
   };
