@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Canvas particle physics demo served at canvas.endziu.xyz. Particles float, wrap at screen edges, draw connecting lines when close, and are attracted to gravity points placed by left-clicking.
+Canvas particle physics demo served at canvas.endziu.xyz. Particles float, wrap at screen edges, and draw connecting lines when within `maxDist`. Left-click places an attraction point (red), right-click places a repulsion point (blue). Particle count and `maxDist` are computed from viewport width and clamped.
 
 ## Commands
 
@@ -13,7 +13,7 @@ Canvas particle physics demo served at canvas.endziu.xyz. Particles float, wrap 
 
 ## Architecture
 
-Vanilla JS with ES modules, bundled by Vite.
+Vanilla JS with ES modules, bundled by Vite. `particle` and `vector` use the prototype-delegation pattern (`Object.create(this)`) rather than classes.
 
 | File | Role |
 |------|------|
