@@ -3,37 +3,39 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>endziu.xyz - a home page - Andrzej Koper</title>
-  <style type="text/css">
+  <title>endziu.xyz — canvas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
     * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     body {
       background: #001000;
-      margin: 0;
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-family: 'Share Tech Mono', monospace;
     }
 
     a {
-      color: #fff;
+      color: rgba(160, 255, 160, 0.9);
       text-decoration: none;
+      letter-spacing: 1px;
+      transition: color 0.1s;
     }
 
     a:hover {
-      color: #000;
-      background-color: #fff;
+      color: #00ff88;
     }
 
     #title {
       position: fixed;
-      top: 20px;
-      left: 20px;
-      margin: 0;
-      color: #fff;
-      font-size: 36px;
+      top: 22px;
+      left: 24px;
+      font-size: 22px;
+      letter-spacing: 2px;
     }
 
     #canvas {
@@ -42,29 +44,204 @@
       height: 100%;
     }
 
-    .controls {
+    /* ── toggle ── */
+    #panel-toggle {
       position: fixed;
-      top: 20px;
+      top: 18px;
       right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      background: rgba(0, 12, 0, 0.82);
+      border: 1px solid rgba(0, 255, 64, 0.55);
+      color: rgba(160, 255, 160, 0.85);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      z-index: 10;
     }
 
-    .controls select,
-    .controls button {
+    #panel-toggle:hover {
+      border-color: rgba(0, 255, 64, 0.9);
+      color: #00ff88;
+      background: rgba(0, 255, 64, 0.1);
+    }
+
+    /* ── panel ── */
+    .controls {
+      position: fixed;
+      top: 52px;
+      right: 20px;
+      width: 192px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transform-origin: top right;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .controls.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px) scale(0.975);
+    }
+
+    /* ── groups ── */
+    .group {
+      border: 1px solid rgba(0, 255, 64, 0.3);
+      background: rgba(0, 12, 0, 0.82);
+      padding: 9px 9px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .group-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: rgba(0, 255, 64, 0.6);
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    /* ── select ── */
+    .controls select {
+      appearance: none;
       background: transparent;
-      border: 1px solid #fff;
-      color: #fff;
-      padding: 6px 14px;
-      font-size: 14px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(160%2C255%2C160%2C0.4)'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 9px center;
+      border: 1px solid rgba(127, 255, 127, 0.4);
+      color: rgba(160, 255, 160, 0.9);
+      padding: 5px 28px 5px 9px;
+      font-size: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 0.5px;
       cursor: pointer;
+      width: 100%;
+      transition: border-color 0.12s, color 0.12s;
+    }
+
+    .controls select option {
+      background: #001800;
     }
 
     .controls select:hover,
+    .controls select:focus {
+      outline: none;
+      border-color: rgba(0, 255, 64, 0.4);
+      color: #00ff88;
+    }
+
+    /* ── buttons ── */
+    .controls button {
+      background: transparent;
+      border: 1px solid rgba(127, 255, 127, 0.35);
+      color: rgba(160, 255, 160, 0.88);
+      padding: 5px 9px;
+      font-size: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      transition: border-color 0.1s, color 0.1s, background 0.1s;
+    }
+
     .controls button:hover {
-      background: #fff;
-      color: #000;
+      border-color: rgba(0, 255, 64, 0.45);
+      color: #00ff88;
+      background: rgba(0, 255, 64, 0.05);
+    }
+
+    .controls button:active {
+      background: rgba(0, 255, 64, 0.12);
+    }
+
+    .controls button[data-active="false"] {
+      color: rgba(160, 255, 160, 0.35);
+      border-color: rgba(127, 255, 127, 0.15);
+    }
+
+    /* ── rows with keyboard hints ── */
+    .btn-row {
+      display: flex;
+      align-items: stretch;
+      gap: 4px;
+    }
+
+    .btn-row button {
+      flex: 1;
+    }
+
+    .key {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      color: rgba(0, 255, 64, 0.55);
+      border: 1px solid rgba(0, 255, 64, 0.35);
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+      letter-spacing: 0;
+      user-select: none;
+    }
+
+    /* ── sliders ── */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .slider-row label {
+      font-size: 11px;
+      color: rgba(160, 255, 160, 0.7);
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .slider-row label span {
+      color: rgba(0, 255, 64, 0.8);
+    }
+
+    .slider-row input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 2px;
+      background: rgba(0, 255, 64, 0.2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      background: rgba(0, 255, 64, 0.7);
+      border: 1px solid rgba(0, 255, 64, 0.9);
+      cursor: pointer;
+    }
+
+    .slider-row input[type="range"]:hover {
+      background: rgba(0, 255, 64, 0.35);
+    }
+
+    .slider-row input[type="range"]:hover::-webkit-slider-thumb {
+      background: #00ff88;
+    }
+
+    /* ── two-up button pairs ── */
+    .btn-pair {
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn-pair button {
+      flex: 1;
     }
   </style>
 </head>
@@ -74,19 +251,50 @@
     <a href="/projects.html">endziu.xyz</a>
   </h1>
 
-  <div class="controls">
-    <button id="reset">reset</button>
-    <button id="save-layout">save layout</button>
-    <button id="rename-layout">rename layout</button>
-    <button id="import-layouts">import layouts</button>
-    <button id="export-layouts">export layouts</button>
-    <button id="remove-layout">remove layout</button>
-    <button id="clear-gravity">clear gravity</button>
-    <button id="toggle-gravity">debug</button>
-    <select id="layout"></select>
-  </div>
-  <canvas id="canvas"></canvas>
+  <button id="panel-toggle" title="toggle controls [h]">ctrl</button>
 
+  <div class="controls" id="controls-panel">
+    <div class="group">
+      <div class="group-label">layout</div>
+      <select id="layout"></select>
+      <div class="btn-pair">
+        <button id="save-layout">save</button>
+        <button id="rename-layout">rename</button>
+      </div>
+      <div class="btn-pair">
+        <button id="import-layouts">import</button>
+        <button id="export-layouts">export</button>
+      </div>
+      <button id="remove-layout">remove</button>
+    </div>
+
+    <div class="group">
+      <div class="group-label">simulation</div>
+      <div class="slider-row">
+        <label for="particle-count">particles <span id="particle-count-val">512</span></label>
+        <input type="range" id="particle-count" min="1" max="512" value="512">
+      </div>
+      <div class="slider-row">
+        <label for="particle-size">size <span id="particle-size-val">3</span></label>
+        <input type="range" id="particle-size" min="1" max="10" value="3">
+      </div>
+      <button id="toggle-placing" data-active="true">placing on</button>
+      <div class="btn-row">
+        <button id="reset">reset</button>
+        <span class="key">R</span>
+      </div>
+      <div class="btn-row">
+        <button id="clear-gravity">clear gravity</button>
+        <span class="key">C</span>
+      </div>
+      <div class="btn-row">
+        <button id="toggle-gravity">debug</button>
+        <span class="key">D</span>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
   <script type="module" src="/js/app.js"></script>
 </body>
 

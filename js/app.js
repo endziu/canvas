@@ -9,12 +9,14 @@ const context = canvas.getContext('2d')
 let width = (canvas.width = window.innerWidth)
 let height = (canvas.height = window.innerHeight)
 
-const numParticles = 512
+let numParticles = 512
+let particleRadius = 3
 let maxDist = clamp(parseInt(width / 8, 10), 50, 200)
 // let maxDist = 150
 
 let particles = []
 let showGravityPoints = false
+let placingEnabled = true
 
 let activeLayout = 'cross'
 const STORAGE_KEY = 'canvas-saved-layouts'
@@ -83,7 +85,7 @@ function updateAndDraw(current_particle, index, arr) {
   if (!current_particle.mass) {
     drawCircle(
       context,
-      3,
+      particleRadius,
       current_particle,
     )
     particles.forEach((item, i) => {
@@ -122,6 +124,7 @@ function windowResizeHandler() {
 
 function mouseDownHandler(event) {
   if (event.target !== canvas) return
+  if (!placingEnabled) return
   const x = event.clientX - canvas.offsetLeft
   const y = event.clientY - canvas.offsetTop
   const m = particle.create(x, y, 0, 0)
@@ -219,6 +222,44 @@ document.getElementById('remove-layout').addEventListener('click', () => {
 document.getElementById('toggle-gravity').addEventListener('click', (e) => {
   showGravityPoints = !showGravityPoints
   e.target.textContent = showGravityPoints ? 'hide debug' : 'debug'
+})
+document.getElementById('panel-toggle').addEventListener('click', () => {
+  document.getElementById('controls-panel').classList.toggle('hidden')
+})
+document.getElementById('toggle-placing').addEventListener('click', (e) => {
+  placingEnabled = !placingEnabled
+  e.target.textContent = placingEnabled ? 'placing on' : 'placing off'
+  e.target.dataset.active = placingEnabled
+})
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return
+  switch (e.key.toLowerCase()) {
+    case 'r':
+      createParticles(numParticles)
+      break
+    case 'c':
+      particles = particles.filter((p) => !p.mass)
+      particles.forEach((p) => { p.gravitations = [] })
+      break
+    case 'd': {
+      showGravityPoints = !showGravityPoints
+      const btn = document.getElementById('toggle-gravity')
+      btn.textContent = showGravityPoints ? 'hide debug' : 'debug'
+      break
+    }
+    case 'h':
+      document.getElementById('controls-panel').classList.toggle('hidden')
+      break
+  }
+})
+document.getElementById('particle-count').addEventListener('input', (e) => {
+  numParticles = parseInt(e.target.value, 10)
+  document.getElementById('particle-count-val').textContent = numParticles
+  createParticles(numParticles)
+})
+document.getElementById('particle-size').addEventListener('input', (e) => {
+  particleRadius = parseInt(e.target.value, 10)
+  document.getElementById('particle-size-val').textContent = particleRadius
 })
 window.addEventListener('resize', windowResizeHandler, false)
 window.addEventListener('mousedown', mouseDownHandler, false)
