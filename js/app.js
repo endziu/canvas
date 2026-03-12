@@ -9,14 +9,14 @@ const context = canvas.getContext('2d')
 let width = (canvas.width = window.innerWidth)
 let height = (canvas.height = window.innerHeight)
 
-let numParticles = 512
-let particleRadius = 3
+let numParticles = 256
+let particleRadius = 5
 let maxDist = clamp(parseInt(width / 8, 10), 50, 200)
 // let maxDist = 150
 
 let particles = []
 let showGravityPoints = false
-let placingEnabled = true
+let placingEnabled = false
 
 let activeLayout = 'cross'
 const STORAGE_KEY = 'canvas-saved-layouts'
@@ -230,6 +230,9 @@ document.getElementById('toggle-placing').addEventListener('click', (e) => {
   placingEnabled = !placingEnabled
   e.target.textContent = placingEnabled ? 'placing on' : 'placing off'
   e.target.dataset.active = placingEnabled
+  showGravityPoints = placingEnabled
+  const debugBtn = document.getElementById('toggle-gravity')
+  debugBtn.textContent = showGravityPoints ? 'hide debug' : 'debug'
 })
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return
