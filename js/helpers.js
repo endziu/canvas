@@ -10,7 +10,7 @@ export function drawLine(context, p1, p2, line_width) {
   context.beginPath()
   context.moveTo(p1.position.getX(), p1.position.getY())
   context.lineTo(p2.position.getX(), p2.position.getY())
-  context.strokeStyle = 'rgba(255,255,255,0.25)'
+  context.strokeStyle = 'rgba(255,255,255,0.125)'
   context.stroke()
 }
 
