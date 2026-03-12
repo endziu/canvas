@@ -8,11 +8,11 @@ const context = canvas.getContext('2d')
 let width = (canvas.width = window.innerWidth)
 let height = (canvas.height = window.innerHeight)
 
-const numParticles = 256
+const numParticles = 200
 let maxDist = clamp(parseInt(width / 8, 10), 50, 200)
 
 let particles = []
-let showGravityPoints = true
+let showGravityPoints = false
 
 // Relative positions [x, y] as fractions of viewport, mass: 120=attract -120=repel
 const gravityPointDefs = [
@@ -142,6 +142,7 @@ function windowResizeHandler() {
 }
 
 function mouseDownHandler(event) {
+  if (event.target !== canvas) return
   const x = event.clientX - canvas.offsetLeft
   const y = event.clientY - canvas.offsetTop
   const m = particle.create(x, y, 0, 0)
@@ -157,13 +158,17 @@ function mouseDownHandler(event) {
 }
 
 document.getElementById('reset').addEventListener('click', () => createParticles(numParticles))
+document.getElementById('clear-gravity').addEventListener('click', () => {
+  particles = particles.filter((p) => !p.mass)
+  particles.forEach((p) => { p.gravitations = [] })
+})
 document.getElementById('toggle-gravity').addEventListener('click', (e) => {
   showGravityPoints = !showGravityPoints
-  e.target.textContent = showGravityPoints ? 'hide gravity' : 'show gravity'
+  e.target.textContent = showGravityPoints ? 'hide debug' : 'debug'
 })
 window.addEventListener('resize', windowResizeHandler, false)
 window.addEventListener('mousedown', mouseDownHandler, false)
-context.globalCompositeOperation = 'destination-over'
+context.globalCompositeOperation = 'lighter'
 canvas.oncontextmenu = (e) => e.preventDefault()
 createParticles(numParticles)
 update()

@@ -42,9 +42,16 @@
       height: 100%;
     }
 
-    #reset, #toggle-gravity {
+    .controls {
       position: fixed;
       top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .controls button {
       background: transparent;
       border: 1px solid #fff;
       color: #fff;
@@ -53,10 +60,7 @@
       cursor: pointer;
     }
 
-    #reset { right: 20px; }
-    #toggle-gravity { right: 90px; }
-
-    #reset:hover, #toggle-gravity:hover {
+    .controls button:hover {
       background: #fff;
       color: #000;
     }
@@ -68,8 +72,11 @@
     <a href="/projects.html">endziu.xyz</a>
   </h1>
 
-  <button id="toggle-gravity">hide gravity</button>
-  <button id="reset">reset</button>
+  <div class="controls">
+    <button id="reset">reset</button>
+    <button id="clear-gravity">clear gravity</button>
+    <button id="toggle-gravity">debug</button>
+  </div>
   <canvas id="canvas"></canvas>
 
   <script type="module" src="/js/app.js"></script>
