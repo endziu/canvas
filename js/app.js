@@ -253,6 +253,16 @@ document.addEventListener('keydown', (e) => {
     case 'h':
       document.getElementById('controls-panel').classList.toggle('hidden')
       break
+    default: {
+      if (!/^[0-9]$/.test(e.key)) break
+      const index = e.key === '0' ? 9 : parseInt(e.key, 10) - 1
+      const names = Object.keys(getAllLayouts())
+      if (index >= names.length) break
+      activeLayout = names[index]
+      layoutSelect.value = activeLayout
+      createParticles(numParticles)
+      break
+    }
   }
 })
 document.getElementById('particle-count').addEventListener('input', (e) => {
