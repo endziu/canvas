@@ -1,6 +1,7 @@
 import particle from './particle.js'
 import { clamp, randomRange } from './utils.js'
 import { drawCircle, drawLine, wrapBounds } from './helpers.js'
+import defaults from './defaults.js'
 
 const canvas = document.getElementById('canvas')
 const context = canvas.getContext('2d')
@@ -8,73 +9,51 @@ const context = canvas.getContext('2d')
 let width = (canvas.width = window.innerWidth)
 let height = (canvas.height = window.innerHeight)
 
-const numParticles = 200
+const numParticles = 512
 let maxDist = clamp(parseInt(width / 8, 10), 50, 200)
+// let maxDist = 150
 
 let particles = []
 let showGravityPoints = false
 
-// Relative positions [x, y] as fractions of viewport, mass: 120=attract -120=repel
-const gravityPointDefs = [
-  // ring of attraction points
-  { x: 0.50, y: 0.28, mass:  120 },
-  { x: 0.57, y: 0.34, mass:  120 },
-  { x: 0.60, y: 0.50, mass:  120 },
-  { x: 0.57, y: 0.66, mass:  120 },
-  { x: 0.50, y: 0.72, mass:  120 },
-  { x: 0.43, y: 0.66, mass:  120 },
-  { x: 0.40, y: 0.50, mass:  120 },
-  { x: 0.43, y: 0.34, mass:  120 },
-  // horizontal bar — left
-  { x: 0.06, y: 0.50, mass:  120 },
-  { x: 0.10, y: 0.50, mass:  120 },
-  { x: 0.14, y: 0.50, mass:  120 },
-  { x: 0.18, y: 0.50, mass:  120 },
-  { x: 0.22, y: 0.50, mass:  120 },
-  { x: 0.26, y: 0.50, mass:  120 },
-  { x: 0.31, y: 0.50, mass:  120 },
-  { x: 0.35, y: 0.50, mass:  120 },
-  // horizontal bar — right
-  { x: 0.65, y: 0.50, mass:  120 },
-  { x: 0.69, y: 0.50, mass:  120 },
-  { x: 0.72, y: 0.50, mass:  120 },
-  { x: 0.78, y: 0.50, mass:  120 },
-  { x: 0.82, y: 0.50, mass:  120 },
-  { x: 0.86, y: 0.50, mass:  120 },
-  { x: 0.90, y: 0.50, mass:  120 },
-  { x: 0.94, y: 0.50, mass:  120 },
+let activeLayout = 'cross'
+const STORAGE_KEY = 'canvas-saved-layouts'
+const layoutSelect = document.getElementById('layout')
 
-  // vertical bar — left
-  { x: 0.50, y: 0.06, mass:  120 },
-  { x: 0.50, y: 0.14, mass:  120 },
-  { x: 0.50, y: 0.22, mass:  120 },
-  { x: 0.50, y: 0.31, mass:  120 },
-  // vertical bar — right
-  { x: 0.50, y: 0.69, mass:  120 },
-  { x: 0.50, y: 0.78, mass:  120 },
-  { x: 0.50, y: 0.86, mass:  120 },
-  { x: 0.50, y: 0.94, mass:  120 },
+function getAllLayouts() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}
+  } catch { return {} }
+}
 
-  // repulsion cluster in the center of the ring
-  { x: 0.47, y: 0.44, mass: -120 },
-  { x: 0.50, y: 0.42, mass: -120 },
-  { x: 0.53, y: 0.44, mass: -120 },
-  { x: 0.47, y: 0.50, mass: -120 },
-  { x: 0.50, y: 0.52, mass: -120 },
-  { x: 0.53, y: 0.50, mass: -120 },
-  // scattered repulsion
-  { x: 0.25, y: 0.18, mass: -120 },
-  { x: 0.35, y: 0.28, mass: -120 },
-  { x: 0.72, y: 0.36, mass: -120 },
-  { x: 0.82, y: 0.28, mass: -120 },
-  { x: 0.27, y: 0.68, mass: -120 },
-  { x: 0.12, y: 0.74, mass: -120 },
-  { x: 0.62, y: 0.64, mass: -120 },
-  { x: 0.72, y: 0.74, mass: -120 },
-]
+function saveAllLayouts(all) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
+}
+
+function seedDefaults() {
+  if (localStorage.getItem(STORAGE_KEY)) return
+  saveAllLayouts(defaults)
+}
+
+function populateOptions() {
+  layoutSelect.innerHTML = ''
+  const all = getAllLayouts()
+  Object.keys(all).forEach((name) => {
+    const opt = document.createElement('option')
+    opt.value = name
+    opt.textContent = name
+    layoutSelect.appendChild(opt)
+  })
+  layoutSelect.value = activeLayout
+}
+
+function getActiveLayoutDefs() {
+  return getAllLayouts()[activeLayout] || []
+}
 
 function createGravityPoints() {
-  gravityPointDefs.forEach(({ x, y, mass }) => {
+  const defs = getActiveLayoutDefs()
+  defs.forEach(({ x, y, mass }) => {
     const m = particle.create(x * width, y * height, 0, 0)
     m.mass = mass
     particles.forEach((p) => { if (!p.mass) p.addGravitation(m) })
@@ -157,10 +136,85 @@ function mouseDownHandler(event) {
   particles.push(m)
 }
 
+layoutSelect.addEventListener('change', (e) => {
+  activeLayout = e.target.value
+  createParticles(numParticles)
+})
 document.getElementById('reset').addEventListener('click', () => createParticles(numParticles))
 document.getElementById('clear-gravity').addEventListener('click', () => {
   particles = particles.filter((p) => !p.mass)
   particles.forEach((p) => { p.gravitations = [] })
+})
+document.getElementById('save-layout').addEventListener('click', () => {
+  const gravityPoints = particles
+    .filter((p) => p.mass)
+    .map((p) => ({
+      x: p.position.getX() / width,
+      y: p.position.getY() / height,
+      mass: p.mass,
+    }))
+  if (gravityPoints.length === 0) return
+  const saved = getAllLayouts()
+  const defaultName = 'save ' + (Object.keys(saved).length + 1)
+  const name = prompt('Layout name:', defaultName)
+  if (!name) return
+  saved[name] = gravityPoints
+  saveAllLayouts(saved)
+  populateOptions()
+  layoutSelect.value = name
+  activeLayout = name
+})
+document.getElementById('rename-layout').addEventListener('click', () => {
+  const saved = getAllLayouts()
+  if (!saved[activeLayout]) return
+  const newName = prompt('Rename layout:', activeLayout)
+  if (!newName || newName === activeLayout || saved[newName]) return
+  saved[newName] = saved[activeLayout]
+  delete saved[activeLayout]
+  saveAllLayouts(saved)
+  activeLayout = newName
+  populateOptions()
+  layoutSelect.value = newName
+})
+document.getElementById('import-layouts').addEventListener('click', () => {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+  input.addEventListener('change', () => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const imported = JSON.parse(reader.result)
+        const all = getAllLayouts()
+        Object.assign(all, imported)
+        saveAllLayouts(all)
+        populateOptions()
+      } catch { /* invalid json */ }
+    }
+    reader.readAsText(input.files[0])
+  })
+  input.click()
+})
+document.getElementById('export-layouts').addEventListener('click', () => {
+  const blob = new Blob(
+    [JSON.stringify(getAllLayouts(), null, 2)],
+    { type: 'application/json' },
+  )
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'data.json'
+  a.click()
+  URL.revokeObjectURL(a.href)
+})
+document.getElementById('remove-layout').addEventListener('click', () => {
+  const saved = getAllLayouts()
+  if (!saved[activeLayout]) return
+  delete saved[activeLayout]
+  saveAllLayouts(saved)
+  populateOptions()
+  activeLayout = 'cross'
+  layoutSelect.value = 'cross'
+  createParticles(numParticles)
 })
 document.getElementById('toggle-gravity').addEventListener('click', (e) => {
   showGravityPoints = !showGravityPoints
@@ -168,7 +222,8 @@ document.getElementById('toggle-gravity').addEventListener('click', (e) => {
 })
 window.addEventListener('resize', windowResizeHandler, false)
 window.addEventListener('mousedown', mouseDownHandler, false)
-context.globalCompositeOperation = 'lighter'
 canvas.oncontextmenu = (e) => e.preventDefault()
+seedDefaults()
+populateOptions()
 createParticles(numParticles)
 update()

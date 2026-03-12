@@ -51,6 +51,7 @@
       gap: 6px;
     }
 
+    .controls select,
     .controls button {
       background: transparent;
       border: 1px solid #fff;
@@ -60,6 +61,7 @@
       cursor: pointer;
     }
 
+    .controls select:hover,
     .controls button:hover {
       background: #fff;
       color: #000;
@@ -74,8 +76,14 @@
 
   <div class="controls">
     <button id="reset">reset</button>
+    <button id="save-layout">save layout</button>
+    <button id="rename-layout">rename layout</button>
+    <button id="import-layouts">import layouts</button>
+    <button id="export-layouts">export layouts</button>
+    <button id="remove-layout">remove layout</button>
     <button id="clear-gravity">clear gravity</button>
     <button id="toggle-gravity">debug</button>
+    <select id="layout"></select>
   </div>
   <canvas id="canvas"></canvas>
 
