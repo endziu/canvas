@@ -18,10 +18,14 @@ const particle = {
     return obj
   },
 
-  distanceTo(p2) {
+  distanceSqTo(p2) {
     const dx = p2.position.getX() - this.position.getX()
     const dy = p2.position.getY() - this.position.getY()
-    return Math.sqrt(dx * dx + dy * dy)
+    return dx * dx + dy * dy
+  },
+
+  distanceTo(p2) {
+    return Math.sqrt(this.distanceSqTo(p2))
   },
 
   gravitateTo(p2) {

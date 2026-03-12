@@ -88,15 +88,16 @@ function updateAndDraw(current_particle, index, arr) {
       particleRadius,
       current_particle,
     )
+    const maxDistSq = maxDist * maxDist
     particles.forEach((item, i) => {
       if (
         i > index - 1 &&
         i < arr.length &&
         !item.mass &&
-        current_particle.distanceTo(item) < maxDist
+        current_particle.distanceSqTo(item) < maxDistSq
       ) {
-        const line_width =
-          5 - (current_particle.distanceTo(item) / maxDist) * 5
+        const dist = current_particle.distanceTo(item)
+        const line_width = 5 - (dist / maxDist) * 5
         drawLine(context, current_particle, item, line_width)
       }
     })
