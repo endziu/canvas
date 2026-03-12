@@ -17,11 +17,20 @@ Vanilla JS with ES modules, bundled by Vite. `particle` and `vector` use the pro
 
 | File | Role |
 |------|------|
-| `js/app.js` | Entry point — creates particles, runs the animation loop, handles mouse/resize events |
+| `js/app.js` | Entry point — creates particles, runs the animation loop, handles mouse/resize/UI events |
 | `js/particle.js` | Particle prototype with position, velocity, friction, gravitation |
 | `js/vector.js` | 2D vector with angle/length manipulation and arithmetic |
 | `js/utils.js` | Math utilities (clamp, lerp, random, distance, bezier, collision) |
 | `js/helpers.js` | Canvas drawing functions (drawCircle, drawLine) and wrapBounds |
+| `js/defaults.js` | Built-in named gravity-point layouts (cross, grid, X, border, cells, pockets, rects) |
+
+### Gravity points
+
+Gravity points are particles with `mass !== null`. Positive mass attracts, negative repels. They're stored in the same `particles` array as regular particles; `!p.mass` distinguishes normal particles from gravity points. Gravity point positions are stored as viewport-relative fractions (`x ∈ [0,1]`, `y ∈ [0,1]`) in layouts, then multiplied by `width`/`height` at creation.
+
+### Layout management
+
+Layouts (named sets of gravity points) are persisted to `localStorage` under key `canvas-saved-layouts`. `js/defaults.js` seeds the initial layouts on first load. The UI supports save, rename, remove, import (JSON file), and export (JSON download).
 
 ## Deployment
 
